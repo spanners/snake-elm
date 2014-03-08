@@ -3,6 +3,7 @@ import Keyboard
 
 (width, height) = (600, 400)
 (hWidth, hHeight) = (width/2, height/2)
+speed = 10
 
 data Event = Tick (Time, (Int, Int))
 
@@ -20,7 +21,7 @@ type Vec = (Float, Float)
 
 type Snake = {pos:Vec}
 
-defaultSnake = { pos = (0, hHeight) }
+defaultSnake = { pos = (0, 50) }
 
 type Game = { snake : Snake
             , score : Int }
@@ -28,10 +29,10 @@ type Game = { snake : Snake
 defaultGame = { snake = defaultSnake
               , score = 0 }
 
-stepSnake dir snake = { snake | pos <- if | (fst dir) < 0 -> (((fst snake.pos) - 1), (snd snake.pos))
-                                             | (fst dir) > 0 -> (((fst snake.pos) + 1), (snd snake.pos))
-                                             | (snd dir) < 0 -> ((fst snake.pos), ((snd snake.pos) - 1))
-                                             | (snd dir) > 0 -> ((fst snake.pos), ((snd snake.pos) + 1)) 
+stepSnake dir snake = { snake | pos <- if | (fst dir) < 0 -> (((fst snake.pos) - speed), (snd snake.pos))
+                                             | (fst dir) > 0 -> (((fst snake.pos) + speed), (snd snake.pos))
+                                             | (snd dir) < 0 -> ((fst snake.pos), ((snd snake.pos) - speed))
+                                             | (snd dir) > 0 -> ((fst snake.pos), ((snd snake.pos) + speed)) 
                                              | otherwise -> snake.pos }
 
 stepGame event g = 
@@ -49,3 +50,4 @@ render (w, h) g =
     in color black <| container w h middle <| color white <| collage width height forms
 
 main = render <~ Window.dimensions ~ foldp stepGame defaultGame event
+
