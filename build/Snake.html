@@ -1,0 +1,184 @@
+<!DOCTYPE HTML>
+<html><head><meta charset="UTF-8"><title>Snake</title><script type="text/javascript" src="/elm-runtime.js"></script><script type="text/javascript">Elm.Main = Elm.Main || {};
+Elm.Main.make = function (_elm) {
+   _elm.Main = _elm.Main || {};
+   if (_elm.Main.values)
+   return _elm.Main.values;
+   var _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _E = _N.Error.make(_elm),
+   _J = _N.JavaScript.make(_elm),
+   $moduleName = "Main";
+   var Basics = Elm.Basics.make(_elm);
+   var Color = Elm.Color.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Collage = Elm.Graphics.Collage.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Element = Elm.Graphics.Element.make(_elm);
+   var Keyboard = Elm.Keyboard.make(_elm);
+   var List = Elm.List.make(_elm);
+   var Maybe = Elm.Maybe.make(_elm);
+   var Native = Native || {};
+   Native.Ports = Elm.Native.Ports.make(_elm);
+   var Prelude = Elm.Prelude.make(_elm);
+   var Signal = Elm.Signal.make(_elm);
+   var String = Elm.String.make(_elm);
+   var Text = Elm.Text.make(_elm);
+   var Time = Elm.Time.make(_elm);
+   var Window = Elm.Window.make(_elm);
+   var _op = {};
+   var Game = F2(function (a,b) {
+      return {_: {}
+             ,score: b
+             ,snake: a};
+   });
+   var defaultSnake = {_: {}
+                      ,pos: {ctor: "_Tuple2"
+                            ,_0: 0
+                            ,_1: 50}};
+   var defaultGame = {_: {}
+                     ,score: 0
+                     ,snake: defaultSnake};
+   var Snake = function (a) {
+      return {_: {},pos: a};
+   };
+   var delta = Time.fps(30);
+   var input = A2(Signal._op["~"],
+   A2(Signal._op["<~"],
+   F2(function (v0,v1) {
+      return {ctor: "_Tuple2"
+             ,_0: v0
+             ,_1: v1};
+   }),
+   A2(Signal.lift,
+   Time.inSeconds,
+   delta)),
+   A2(Signal.sampleOn,
+   delta,
+   A2(Signal._op["<~"],
+   function (_v0) {
+      return function () {
+         return {ctor: "_Tuple2"
+                ,_0: _v0.x
+                ,_1: _v0.y};
+      }();
+   },
+   Keyboard.arrows)));
+   var tf = F3(function (y,
+   scl,
+   str) {
+      return Graphics.Collage.move({ctor: "_Tuple2"
+                                   ,_0: 0
+                                   ,_1: y})(Graphics.Collage.scale(scl)(Graphics.Collage.toForm(Text.text(Text.color(Color.black)(Text.toText(str))))));
+   });
+   var Tick = function (a) {
+      return {ctor: "Tick",_0: a};
+   };
+   var event = Signal.merges(_J.toList([A2(Signal.lift,
+   Tick,
+   input)]));
+   var speed = 10;
+   var stepSnake = F2(function (dir,
+   snake) {
+      return _U.replace([["pos"
+                         ,_U.cmp(Basics.fst(dir),
+                         0) < 0 ? {ctor: "_Tuple2"
+                                  ,_0: Basics.fst(snake.pos) - speed
+                                  ,_1: Basics.snd(snake.pos)} : _U.cmp(Basics.fst(dir),
+                         0) > 0 ? {ctor: "_Tuple2"
+                                  ,_0: Basics.fst(snake.pos) + speed
+                                  ,_1: Basics.snd(snake.pos)} : _U.cmp(Basics.snd(dir),
+                         0) < 0 ? {ctor: "_Tuple2"
+                                  ,_0: Basics.fst(snake.pos)
+                                  ,_1: Basics.snd(snake.pos) - speed} : _U.cmp(Basics.snd(dir),
+                         0) > 0 ? {ctor: "_Tuple2"
+                                  ,_0: Basics.fst(snake.pos)
+                                  ,_1: Basics.snd(snake.pos) + speed} : snake.pos]],
+      snake);
+   });
+   var stepGame = F2(function (event,
+   g) {
+      return function () {
+         switch (event.ctor)
+         {case "Tick":
+            switch (event._0.ctor)
+              {case "_Tuple2":
+                 return _U.replace([["snake"
+                                    ,A2(stepSnake,
+                                    event._0._1,
+                                    g.snake)]
+                                   ,["score",g.score + 1]],
+                   g);}
+              break;}
+         return g;
+      }();
+   });
+   var $ = {ctor: "_Tuple2"
+           ,_0: 600
+           ,_1: 400},
+   width = $._0,
+   height = $._1;
+   var $ = {ctor: "_Tuple2"
+           ,_0: width / 2
+           ,_1: height / 2},
+   hWidth = $._0,
+   hHeight = $._1;
+   var render = F2(function (_v6,
+   g) {
+      return function () {
+         switch (_v6.ctor)
+         {case "_Tuple2":
+            return function () {
+                 var txts = _J.toList([A3(tf,
+                 0,
+                 4,
+                 "Hello World")]);
+                 var formSnake = function (_v10) {
+                    return function () {
+                       return Graphics.Collage.move(_v10.pos)(Graphics.Collage.filled(Color.black)(Graphics.Collage.circle(10)));
+                    }();
+                 };
+                 var forms = _L.append(txts,
+                 _J.toList([formSnake(g.snake)]));
+                 return Graphics.Element.color(Color.black)(A3(Graphics.Element.container,
+                 _v6._0,
+                 _v6._1,
+                 Graphics.Element.middle)(Graphics.Element.color(Color.white)(A3(Graphics.Collage.collage,
+                 width,
+                 height,
+                 forms))));
+              }();}
+         _E.Case($moduleName,
+         "between lines 47 and 50");
+      }();
+   });
+   var main = A2(Signal._op["~"],
+   A2(Signal._op["<~"],
+   render,
+   Window.dimensions),
+   A3(Signal.foldp,
+   stepGame,
+   defaultGame,
+   event));
+   _elm.Main.values = {_op: _op
+                      ,height: height
+                      ,width: width
+                      ,hHeight: hHeight
+                      ,hWidth: hWidth
+                      ,speed: speed
+                      ,tf: tf
+                      ,delta: delta
+                      ,input: input
+                      ,defaultSnake: defaultSnake
+                      ,defaultGame: defaultGame
+                      ,stepSnake: stepSnake
+                      ,stepGame: stepGame
+                      ,event: event
+                      ,render: render
+                      ,main: main
+                      ,Tick: Tick
+                      ,Snake: Snake
+                      ,Game: Game};
+   return _elm.Main.values;
+};</script></head><body><script type="text/javascript">Elm.fullscreen(Elm.Main)</script><noscript></noscript></body></html>
