@@ -3,7 +3,7 @@ import Keyboard
 
 (width, height) = (600, 400)
 (hWidth, hHeight) = (width/2, height/2)
-speed = 10
+speed = 5
 
 data Event = Tick (Time, (Int, Int))
 
@@ -24,7 +24,7 @@ data Heading = Up | Down | Left | Right
 type Snake = {pos:Vec, heading:Heading}
 
 defaultSnake = { pos = (0, 0),
-                 heading = Down }
+                 heading = Right }
 
 type Game = { snake : Snake
             , score : Int }
@@ -39,8 +39,9 @@ up dir = (snd dir) > 0
 
 stepSnake dir snake = { snake | pos <- if | snake.heading == Left -> ((fst snake.pos) - speed, (snd snake.pos))
                                           | snake.heading == Right -> ((fst snake.pos) + speed, (snd snake.pos))
+                                          | snake.heading == Down -> ((fst snake.pos), (snd snake.pos) - speed)
                                           | snake.heading == Up -> ((fst snake.pos), (snd snake.pos) + speed)
-                                          | otherwise -> ((fst snake.pos), (snd snake.pos) - speed)
+                                          | otherwise -> snake.pos
                               , heading <- if | left dir -> if snake.heading == Left || snake.heading == Right then snake.heading else Left 
                                               | right dir -> if snake.heading == Left || snake.heading == Right then snake.heading else Right 
                                               | down dir -> if snake.heading == Up || snake.heading == Down then snake.heading else Down
@@ -49,15 +50,16 @@ stepSnake dir snake = { snake | pos <- if | snake.heading == Left -> ((fst snake
 
 stepGame event g = 
     case event of
-        Tick (t, dir) -> { g | snake <- stepSnake dir g.snake
-                         , score     <- g.score + 1 }
+        Tick (t, dir) -> let g' = { g | snake <- stepSnake dir g.snake, score <- g.score + 1 }
+                             out = let (x, y) = g.snake.pos in abs x > hWidth || abs y > hHeight
+                         in if out then defaultGame else g'
         _             -> g
 
 event = merges [ lift Tick input ]
 
 render (w, h) g = 
     let formSnake {pos} = circle 10 |> filled black |> move pos
-        txts  = [ (tf 0 4 (show g.snake.heading)), (tf 10 2 (show g.snake.pos)) ]
+        txts  = [ (tf 0 4 (show g.snake.heading)), (tf 50 2 (show g.snake.pos)) ]
         forms = txts ++ [formSnake g.snake]
     in color black <| container w h middle <| color white <| collage width height forms
 
