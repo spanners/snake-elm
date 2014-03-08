@@ -19,9 +19,12 @@ input = (,) <~ lift inSeconds delta
 
 type Vec = (Float, Float) 
 
-type Snake = {pos:Vec}
+data Heading = Up | Down | Left | Right
 
-defaultSnake = { pos = (0, 50) }
+type Snake = {pos:Vec, heading:Heading}
+
+defaultSnake = { pos = (0, 0),
+                 heading = Down }
 
 type Game = { snake : Snake
             , score : Int }
@@ -29,11 +32,20 @@ type Game = { snake : Snake
 defaultGame = { snake = defaultSnake
               , score = 0 }
 
-stepSnake dir snake = { snake | pos <- if | (fst dir) < 0 -> (((fst snake.pos) - speed), (snd snake.pos))
-                                             | (fst dir) > 0 -> (((fst snake.pos) + speed), (snd snake.pos))
-                                             | (snd dir) < 0 -> ((fst snake.pos), ((snd snake.pos) - speed))
-                                             | (snd dir) > 0 -> ((fst snake.pos), ((snd snake.pos) + speed)) 
-                                             | otherwise -> snake.pos }
+left dir = (fst dir) < 0
+right dir = (fst dir) > 0
+down dir = (snd dir) < 0
+up dir = (snd dir) > 0
+
+stepSnake dir snake = { snake | pos <- if | snake.heading == Left -> ((fst snake.pos) - speed, (snd snake.pos))
+                                          | snake.heading == Right -> ((fst snake.pos) + speed, (snd snake.pos))
+                                          | snake.heading == Up -> ((fst snake.pos), (snd snake.pos) + speed)
+                                          | otherwise -> ((fst snake.pos), (snd snake.pos) - speed)
+                              , heading <- if | left dir -> if snake.heading == Left || snake.heading == Right then snake.heading else Left 
+                                              | right dir -> if snake.heading == Left || snake.heading == Right then snake.heading else Right 
+                                              | down dir -> if snake.heading == Up || snake.heading == Down then snake.heading else Down
+                                              | up dir -> if snake.heading == Up || snake.heading == Down then snake.heading else Up
+                                              | otherwise -> snake.heading }
 
 stepGame event g = 
     case event of
@@ -45,7 +57,7 @@ event = merges [ lift Tick input ]
 
 render (w, h) g = 
     let formSnake {pos} = circle 10 |> filled black |> move pos
-        txts  = [ tf 0 4 "Hello World"]
+        txts  = [ (tf 0 4 (show g.snake.heading)), (tf 10 2 (show g.snake.pos)) ]
         forms = txts ++ [formSnake g.snake]
     in color black <| container w h middle <| color white <| collage width height forms
 
