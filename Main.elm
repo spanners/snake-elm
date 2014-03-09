@@ -7,6 +7,9 @@ import Keyboard
 speed : Float
 speed = 5
 
+size : Float
+size = 10
+
 data Event = Tick (Time, (Int, Int))
 
 formString : Float -> Float -> String -> Form
@@ -77,7 +80,7 @@ stepGame event g =
         Tick (t, dir) -> let g' = { g | snake <- stepSnake dir g.snake
                                       , score <- g.score + 1 }
                              out = let (x, y) = g.snake.pos 
-                                   in abs x > hWidth || abs y > hHeight
+                                   in abs x > hWidth - size || abs y > hHeight - size
                          in if out then defaultGame else g'
         _             -> g
 
@@ -86,7 +89,7 @@ event = merges [ lift Tick input ]
 
 render : (Int, Int) -> Game -> Element
 render (w, h) g = 
-    let formSnake pos = circle 10 |> filled black |> move pos
+    let formSnake pos = circle size |> filled black |> move pos
         txts  = [ (formString 0 2 (show g.snake.heading))
                 , (formString 50 2 (show g.snake.pos)) ]
         forms = txts ++ map formSnake (g.snake.pos :: g.snake.body)
