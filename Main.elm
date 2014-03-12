@@ -37,7 +37,11 @@ type Snake = { pos     : Vec
 defaultSnake : Snake
 defaultSnake = { pos = (0, 0)
                , heading = Right 
-               , body = [(1, 0), (2, 0), (3, 0), (4, 0), (5, 0)] }
+               , body = [ (0,0), 
+                          (0,0), 
+                          (0,0), 
+                          (0,0), 
+                          (0,0) ] }
 
 type Game = { snake : Snake
             , score : Int }
@@ -62,7 +66,7 @@ initHelper (x::xs) = if | xs == [] -> []
                         | otherwise -> x :: (initHelper xs)
 
 updateBody : Vec -> Heading -> [Vec] -> [Vec]
-updateBody pos h body = map (updatePos h (speed-5)) (pos :: (init body))
+updateBody pos h body = map (updatePos h 0) (pos :: (init body))
 
 stepSnake : (Int, Int) -> Snake -> Snake
 stepSnake dir ({pos, heading} as snake) = 
@@ -101,9 +105,7 @@ event = merges [ lift Tick input ]
 render : (Int, Int) -> Game -> Element
 render (w, h) g = 
     let formSnake pos = circle size |> filled black |> move pos
-        txts  = [ (formString 0 2 (show g.snake.heading))
-                , (formString 50 2 (show g.snake.pos))
-                , (formString 100 2 (show g.snake.body)) ]
+        txts  = [ {-(formString 100 2 (show g.snake.body))-} ]
         forms = txts ++ map formSnake (g.snake.pos :: g.snake.body)
     in color black <| container w h middle <| color white <| collage width height forms
 
