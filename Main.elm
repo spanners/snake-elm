@@ -37,7 +37,7 @@ type Snake = { pos     : Vec
 defaultSnake : Snake
 defaultSnake = { pos = (0, 0)
                , heading = Right 
-               , body = [(5, 0)] }
+               , body = [(1, 0), (2, 0), (3, 0), (4, 0), (5, 0)] }
 
 type Game = { snake : Snake
             , score : Int }
@@ -46,12 +46,23 @@ defaultGame : Game
 defaultGame = { snake = defaultSnake
               , score = 0 }
 
-updatePos : Heading -> Vec -> Vec
-updatePos h (x,y) = if | h == Left -> (x - speed, y)
-          | h == Right -> (x + speed, y)
-          | h == Down -> (x, y - speed)  
-          | h == Up -> (x, y + speed)        
+updatePos : Heading -> Float ->  Vec -> Vec
+updatePos h sp (x,y) = if | h == Left -> (x - sp, y)
+          | h == Right -> (x + sp, y)
+          | h == Down -> (x, y - sp) 
+          | h == Up -> (x, y + sp)
           | otherwise -> (x, y)
+
+init : [Vec] -> [Vec]
+init list = if | length list < 2 -> list
+               | otherwise -> let (x::xs) = list in x :: (initHelper xs)
+
+initHelper : [Vec] -> [Vec]
+initHelper (x::xs) = if | xs == [] -> []
+                        | otherwise -> x :: (initHelper xs)
+
+updateBody : Vec -> Heading -> [Vec] -> [Vec]
+updateBody pos h body = map (updatePos h (speed-5)) (pos :: (init body))
 
 stepSnake : (Int, Int) -> Snake -> Snake
 stepSnake dir ({pos, heading} as snake) = 
@@ -64,7 +75,7 @@ stepSnake dir ({pos, heading} as snake) =
                             | right dir -> Right
                             | down dir -> Down
                             | up dir -> Up
-    in { snake | pos <- updatePos h pos
+    in { snake | pos <- updatePos h speed pos
                , heading <- if | left dir || right dir -> if h == Left || h == Right 
                                                           then h 
                                                           else getHeading dir
@@ -72,7 +83,7 @@ stepSnake dir ({pos, heading} as snake) =
                                                        then h 
                                                        else getHeading dir
                                | otherwise -> h
-               , body <- [pos] }
+               , body <- updateBody pos h snake.body }
 
 stepGame : Event -> Game -> Game
 stepGame event g = 
@@ -91,7 +102,8 @@ render : (Int, Int) -> Game -> Element
 render (w, h) g = 
     let formSnake pos = circle size |> filled black |> move pos
         txts  = [ (formString 0 2 (show g.snake.heading))
-                , (formString 50 2 (show g.snake.pos)) ]
+                , (formString 50 2 (show g.snake.pos))
+                , (formString 100 2 (show g.snake.body)) ]
         forms = txts ++ map formSnake (g.snake.pos :: g.snake.body)
     in color black <| container w h middle <| color white <| collage width height forms
 
