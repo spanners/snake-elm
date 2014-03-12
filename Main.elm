@@ -30,12 +30,12 @@ type Vec = (Float, Float)
 
 data Heading = Up | Down | Left | Right
 
-type Snake = { pos     : Vec
+type Snake = { head    : Vec
              , heading : Heading
              , body    : [Vec] }
 
 defaultSnake : Snake
-defaultSnake = { pos = (0, 0)
+defaultSnake = { head = (0, 0)
                , heading = Right 
                , body = [ (0,0), 
                           (0,0), 
@@ -51,35 +51,35 @@ defaultGame = { snake = defaultSnake
               , score = 0 }
 
 updatePos : Heading -> Float ->  Vec -> Vec
-updatePos h sp (x,y) = if | h == Left -> (x - sp, y)
-          | h == Right -> (x + sp, y)
-          | h == Down -> (x, y - sp) 
-          | h == Up -> (x, y + sp)
-          | otherwise -> (x, y)
+updatePos h sp (x,y) = if | h == Left  -> (x - sp, y)
+                          | h == Right -> (x + sp, y)
+                          | h == Down  -> (x, y - sp) 
+                          | h == Up    -> (x, y + sp)
+                          | otherwise  -> (x,      y)
 
 init : [Vec] -> [Vec]
 init list = if | length list < 2 -> list
                | otherwise -> let (x::xs) = list in x :: (initHelper xs)
 
 initHelper : [Vec] -> [Vec]
-initHelper (x::xs) = if | xs == [] -> []
+initHelper (x::xs) = if | xs == []  -> []
                         | otherwise -> x :: (initHelper xs)
 
 updateBody : Vec -> Heading -> [Vec] -> [Vec]
-updateBody pos h body = map (updatePos h 0) (pos :: (init body))
+updateBody head h body = map (updatePos h 0) (head :: (init body))
 
 stepSnake : (Int, Int) -> Snake -> Snake
-stepSnake dir ({pos, heading} as snake) = 
+stepSnake dir ({head, heading} as snake) = 
     let h = heading
-        left dir = (fst dir) < 0
+        left  dir = (fst dir) < 0
         right dir = (fst dir) > 0
-        down dir = (snd dir) < 0
-        up dir = (snd dir) > 0
-        getHeading dir = if | left dir -> Left
+        down  dir = (snd dir) < 0
+        up    dir = (snd dir) > 0
+        getHeading dir = if | left  dir -> Left
                             | right dir -> Right
-                            | down dir -> Down
-                            | up dir -> Up
-    in { snake | pos <- updatePos h speed pos
+                            | down  dir -> Down
+                            | up    dir -> Up
+    in { snake | head <- updatePos h speed head
                , heading <- if | left dir || right dir -> if h == Left || h == Right 
                                                           then h 
                                                           else getHeading dir
@@ -87,15 +87,16 @@ stepSnake dir ({pos, heading} as snake) =
                                                        then h 
                                                        else getHeading dir
                                | otherwise -> h
-               , body <- updateBody pos h snake.body }
+               , body <- updateBody head h snake.body }
 
 stepGame : Event -> Game -> Game
 stepGame event g = 
     case event of
-        Tick (t, dir) -> let g' = { g | snake <- stepSnake dir g.snake
-                                      , score <- g.score + 1 }
-                             out = let (x, y) = g.snake.pos 
-                                   in abs x > hWidth - size || abs y > hHeight - size
+        Tick (t, dir) -> let  g' = { g | snake <- stepSnake dir g.snake
+                                       , score <- g.score + 1 }
+                             out = let (x, y) = g.snake.head 
+                                   in abs x > hWidth - size || 
+                                        abs y > hHeight - size
                          in if out then defaultGame else g'
         _             -> g
 
@@ -104,9 +105,9 @@ event = merges [ lift Tick input ]
 
 render : (Int, Int) -> Game -> Element
 render (w, h) g = 
-    let formSnake pos = circle size |> filled black |> move pos
+    let formSnake head = circle size |> filled black |> move head
         txts  = [ {-(formString 100 2 (show g.snake.body))-} ]
-        forms = txts ++ map formSnake (g.snake.pos :: g.snake.body)
+        forms = txts ++ map formSnake (g.snake.head :: g.snake.body)
     in color black <| container w h middle <| color white <| collage width height forms
 
 main : Signal Element
