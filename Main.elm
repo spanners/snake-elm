@@ -64,7 +64,7 @@ type Game = { snake  : Snake
 defaultGame : Game
 defaultGame = { snake = defaultSnake
               , score = 0 
-              , apples = [] }
+              , apples = [{defaultApple | pos <- (90,90)}] }
 
 newApple : Vec -> Apple
 newApple pos = { defaultApple | pos <- pos }
