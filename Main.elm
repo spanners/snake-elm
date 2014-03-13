@@ -12,6 +12,12 @@ spawnInterval = 5
 size : Float
 size = 10
 
+vecLen : Vec -> Float
+vecLen (x,y) = sqrt (x * x + y * y)
+
+vecSub : Vec -> Vec -> Vec
+vecSub (ax,ay) (bx,by) = (ax-bx, ay-by)
+
 data Event = Tick (Time, (Int, Int)) | Spawn Apple
 
 formString : Float -> Float -> String -> Form
@@ -106,8 +112,14 @@ stepSnake dir ({head, heading} as snake) =
 stepGame : Event -> Game -> Game
 stepGame event g = 
     case event of
-        Tick (t, dir) -> let  g' = { g | snake <- stepSnake dir g.snake
-                                       , score <- g.score + 1 }
+        Tick (t, dir) -> let  hit apple = 
+                                (vecLen <| vecSub g.snake.head apple.pos) < (size + size)
+                              touched = filter hit g.apples
+                              untouched = filter (not . hit) g.apples
+                              hitApple = not <| isEmpty touched
+                              g' = { g | snake <- stepSnake dir g.snake
+                                       , apples <- untouched
+                                       , score <- if hitApple then g.score + 1 else g.score }
                               out = let (x, y) = g.snake.head 
                                     in abs x > hWidth - size || 
                                          abs y > hHeight - size
