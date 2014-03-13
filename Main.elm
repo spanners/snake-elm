@@ -128,7 +128,7 @@ interval = (every (second * spawnInterval))
 
 event : Signal Event
 event = merges [ lift Tick input 
-               , lift (\x -> Spawn (newApple (x,0))) (randX interval) ]
+               , lift (\pos -> Spawn (newApple pos)) (lift2 (,) (randX interval) (randY interval)) ]
 
 render : (Int, Int) -> Game -> Element
 render (w, h) g = 
