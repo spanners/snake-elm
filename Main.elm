@@ -99,6 +99,7 @@ stepSnake dir hit ({head, heading} as snake) =
                             | right dir -> Right
                             | down  dir -> Down
                             | up    dir -> Up
+        update body = updateBody head h body
     in { snake | head <- updatePos h speed head
                , heading <- if | left dir || right dir -> if h == Left || h == Right 
                                                           then h 
@@ -107,7 +108,9 @@ stepSnake dir hit ({head, heading} as snake) =
                                                        then h 
                                                        else getHeading dir
                                | otherwise -> h
-               , body <- if hit then updateBody head h ((width+size,height+size) :: snake.body) else updateBody head h snake.body }
+               , body <- if hit 
+                         then update ((width+size,height+size) :: snake.body) 
+                         else update snake.body }
 
 stepGame : Event -> Game -> Game
 stepGame event g = 
