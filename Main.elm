@@ -88,8 +88,8 @@ initHelper (x::xs) = if | xs == []  -> []
 updateBody : Vec -> Heading -> [Vec] -> [Vec]
 updateBody head h body = map (updatePos h 0) (head :: (init body))
 
-stepSnake : (Int, Int) -> Snake -> Snake
-stepSnake dir ({head, heading} as snake) = 
+stepSnake : (Int, Int) -> Bool -> Snake -> Snake
+stepSnake dir hit ({head, heading} as snake) = 
     let h = heading
         left  dir = (fst dir) < 0
         right dir = (fst dir) > 0
@@ -107,7 +107,7 @@ stepSnake dir ({head, heading} as snake) =
                                                        then h 
                                                        else getHeading dir
                                | otherwise -> h
-               , body <- updateBody head h snake.body }
+               , body <- if hit then updateBody head h ((width+size,height+size) :: snake.body) else updateBody head h snake.body }
 
 stepGame : Event -> Game -> Game
 stepGame event g = 
@@ -117,7 +117,7 @@ stepGame event g =
                               touched = filter hit g.apples
                               untouched = filter (not . hit) g.apples
                               hitApple = not <| isEmpty touched
-                              g' = { g | snake <- stepSnake dir g.snake
+                              g' = { g | snake <- stepSnake dir hitApple g.snake
                                        , apples <- untouched
                                        , score <- if hitApple then g.score + 1 else g.score }
                               out = let (x, y) = g.snake.head 
@@ -145,7 +145,7 @@ event = merges [ lift Tick input
 render : (Int, Int) -> Game -> Element
 render (w, h) g = 
     let formSnake head = circle size |> filled black |> move head
-        txts  = [ {-(formString 100 2 (show g.snake.body))-} ]
+        txts  = [ (formString 100 2 (show g.score)) ]
         forms = txts ++ map formSnake (g.snake.head :: g.snake.body) ++ map (\a -> formSnake a.pos) g.apples 
     in color black <| container w h middle <| color white <| collage width height forms
 
