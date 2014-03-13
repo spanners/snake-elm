@@ -1,0 +1,442 @@
+<!DOCTYPE HTML>
+<html><head><meta charset="UTF-8"><title>Main</title><script type="text/javascript" src="/elm-runtime.js"></script><script type="text/javascript">Elm.Main = Elm.Main || {};
+Elm.Main.make = function (_elm) {
+   _elm.Main = _elm.Main || {};
+   if (_elm.Main.values)
+   return _elm.Main.values;
+   var _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _E = _N.Error.make(_elm),
+   _J = _N.JavaScript.make(_elm),
+   $moduleName = "Main";
+   var Basics = Elm.Basics.make(_elm);
+   var Color = Elm.Color.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Collage = Elm.Graphics.Collage.make(_elm);
+   var Graphics = Graphics || {};
+   Graphics.Element = Elm.Graphics.Element.make(_elm);
+   var Keyboard = Elm.Keyboard.make(_elm);
+   var List = Elm.List.make(_elm);
+   var Maybe = Elm.Maybe.make(_elm);
+   var Native = Native || {};
+   Native.Ports = Elm.Native.Ports.make(_elm);
+   var Prelude = Elm.Prelude.make(_elm);
+   var Random = Elm.Random.make(_elm);
+   var Signal = Elm.Signal.make(_elm);
+   var String = Elm.String.make(_elm);
+   var Text = Elm.Text.make(_elm);
+   var Time = Elm.Time.make(_elm);
+   var Window = Elm.Window.make(_elm);
+   var _op = {};
+   var randFloat = function (sig) {
+      return A2(Signal.lift,
+      function (x) {
+         return x / 100;
+      },
+      A2(Signal.lift,
+      Basics.toFloat,
+      A3(Random.range,0,100,sig)));
+   };
+   var rand = F2(function (fn,
+   sig) {
+      return A2(Signal.lift,
+      fn,
+      randFloat(sig));
+   });
+   var initHelper = function (_v0) {
+      return function () {
+         switch (_v0.ctor)
+         {case "::": return _U.eq(_v0._1,
+              _J.toList([])) ? _J.toList([]) : {ctor: "::"
+                                               ,_0: _v0._0
+                                               ,_1: initHelper(_v0._1)};}
+         _E.Case($moduleName,
+         "between lines 85 and 86");
+      }();
+   };
+   var init = function (list) {
+      return _U.cmp(List.length(list),
+      2) < 0 ? list : function () {
+         var $raw = list,
+         $ = $raw.ctor === "::" ? $raw : _E.Case($moduleName,
+         "on line 82, column 45 to 49"),
+         x = $._0,
+         xs = $._1;
+         return {ctor: "::"
+                ,_0: x
+                ,_1: initHelper(xs)};
+      }();
+   };
+   var Game = F3(function (a,b,c) {
+      return {_: {}
+             ,apples: c
+             ,score: b
+             ,snake: a};
+   });
+   var Snake = F3(function (a,
+   b,
+   c) {
+      return {_: {}
+             ,body: c
+             ,head: a
+             ,heading: b};
+   });
+   var defaultApple = {_: {}
+                      ,col: Color.lightGreen
+                      ,pos: {ctor: "_Tuple2"
+                            ,_0: 0
+                            ,_1: 0}};
+   var newApple = function (pos) {
+      return _U.replace([["pos"
+                         ,pos]],
+      defaultApple);
+   };
+   var Apple = F2(function (a,b) {
+      return {_: {},col: b,pos: a};
+   });
+   var Right = {ctor: "Right"};
+   var defaultSnake = {_: {}
+                      ,body: _J.toList([{ctor: "_Tuple2"
+                                        ,_0: 0
+                                        ,_1: 0}
+                                       ,{ctor: "_Tuple2",_0: 0,_1: 0}
+                                       ,{ctor: "_Tuple2",_0: 0,_1: 0}
+                                       ,{ctor: "_Tuple2",_0: 0,_1: 0}
+                                       ,{ctor: "_Tuple2",_0: 0,_1: 0}])
+                      ,head: {ctor: "_Tuple2"
+                             ,_0: 0
+                             ,_1: 0}
+                      ,heading: Right};
+   var defaultGame = {_: {}
+                     ,apples: _J.toList([_U.replace([["pos"
+                                                     ,{ctor: "_Tuple2"
+                                                      ,_0: 90
+                                                      ,_1: 90}]],
+                     defaultApple)])
+                     ,score: 0
+                     ,snake: defaultSnake};
+   var Left = {ctor: "Left"};
+   var Down = {ctor: "Down"};
+   var Up = {ctor: "Up"};
+   var updatePos = F3(function (h,
+   sp,
+   _v4) {
+      return function () {
+         switch (_v4.ctor)
+         {case "_Tuple2": return _U.eq(h,
+              Left) ? {ctor: "_Tuple2"
+                      ,_0: _v4._0 - sp
+                      ,_1: _v4._1} : _U.eq(h,
+              Right) ? {ctor: "_Tuple2"
+                       ,_0: _v4._0 + sp
+                       ,_1: _v4._1} : _U.eq(h,
+              Down) ? {ctor: "_Tuple2"
+                      ,_0: _v4._0
+                      ,_1: _v4._1 - sp} : _U.eq(h,
+              Up) ? {ctor: "_Tuple2"
+                    ,_0: _v4._0
+                    ,_1: _v4._1 + sp} : {ctor: "_Tuple2"
+                                        ,_0: _v4._0
+                                        ,_1: _v4._1};}
+         _E.Case($moduleName,
+         "between lines 74 and 78");
+      }();
+   });
+   var updateBody = F3(function (head,
+   h,
+   body) {
+      return A2(List.map,
+      A2(updatePos,h,0),
+      {ctor: "::"
+      ,_0: head
+      ,_1: init(body)});
+   });
+   var delta = Time.fps(30);
+   var input = A2(Signal._op["~"],
+   A2(Signal._op["<~"],
+   F2(function (v0,v1) {
+      return {ctor: "_Tuple2"
+             ,_0: v0
+             ,_1: v1};
+   }),
+   A2(Signal.lift,
+   Time.inSeconds,
+   delta)),
+   A2(Signal.sampleOn,
+   delta,
+   A2(Signal._op["<~"],
+   function (_v8) {
+      return function () {
+         return {ctor: "_Tuple2"
+                ,_0: _v8.x
+                ,_1: _v8.y};
+      }();
+   },
+   Keyboard.arrows)));
+   var formString = F3(function (y,
+   scl,
+   str) {
+      return Graphics.Collage.move({ctor: "_Tuple2"
+                                   ,_0: 0
+                                   ,_1: y})(Graphics.Collage.scale(scl)(Graphics.Collage.toForm(Text.text(Text.color(Color.black)(Text.toText(str))))));
+   });
+   var Spawn = function (a) {
+      return {ctor: "Spawn",_0: a};
+   };
+   var Tick = function (a) {
+      return {ctor: "Tick",_0: a};
+   };
+   var vecSub = F2(function (_v10,
+   _v11) {
+      return function () {
+         switch (_v11.ctor)
+         {case "_Tuple2":
+            return function () {
+                 switch (_v10.ctor)
+                 {case "_Tuple2":
+                    return {ctor: "_Tuple2"
+                           ,_0: _v10._0 - _v11._0
+                           ,_1: _v10._1 - _v11._1};}
+                 _E.Case($moduleName,
+                 "on line 19, column 27 to 39");
+              }();}
+         _E.Case($moduleName,
+         "on line 19, column 27 to 39");
+      }();
+   });
+   var vecLen = function (_v18) {
+      return function () {
+         switch (_v18.ctor)
+         {case "_Tuple2":
+            return Basics.sqrt(_v18._0 * _v18._0 + _v18._1 * _v18._1);}
+         _E.Case($moduleName,
+         "on line 16, column 16 to 35");
+      }();
+   };
+   var size = 10;
+   var spawnInterval = 5;
+   var interval = Time.every(Time.second * spawnInterval);
+   var speed = 5;
+   var $ = {ctor: "_Tuple2"
+           ,_0: 600
+           ,_1: 400},
+   width = $._0,
+   height = $._1;
+   var $ = {ctor: "_Tuple2"
+           ,_0: width / 2
+           ,_1: height / 2},
+   hWidth = $._0,
+   hHeight = $._1;
+   var stepSnake = F3(function (dir,
+   hit,
+   _v22) {
+      return function () {
+         return function () {
+            var up = function (dir) {
+               return _U.cmp(Basics.snd(dir),
+               0) > 0;
+            };
+            var down = function (dir) {
+               return _U.cmp(Basics.snd(dir),
+               0) < 0;
+            };
+            var right = function (dir) {
+               return _U.cmp(Basics.fst(dir),
+               0) > 0;
+            };
+            var left = function (dir) {
+               return _U.cmp(Basics.fst(dir),
+               0) < 0;
+            };
+            var getHeading = function (dir) {
+               return left(dir) ? Left : right(dir) ? Right : down(dir) ? Down : up(dir) ? Up : _E.If($moduleName,
+               "between lines 98 and 101");
+            };
+            var h = _v22.heading;
+            var update = function (body) {
+               return A3(updateBody,
+               _v22.head,
+               h,
+               body);
+            };
+            return _U.replace([["head"
+                               ,A3(updatePos,
+                               h,
+                               speed,
+                               _v22.head)]
+                              ,["heading"
+                               ,left(dir) || right(dir) ? _U.eq(h,
+                               Left) || _U.eq(h,
+                               Right) ? h : getHeading(dir) : down(dir) || up(dir) ? _U.eq(h,
+                               Up) || _U.eq(h,
+                               Down) ? h : getHeading(dir) : h]
+                              ,["body"
+                               ,hit ? update({ctor: "::"
+                                             ,_0: {ctor: "_Tuple2"
+                                                  ,_0: width + size
+                                                  ,_1: height + size}
+                                             ,_1: _v22.body}) : update(_v22.body)]],
+            _v22);
+         }();
+      }();
+   });
+   var stepGame = F2(function (event,
+   g) {
+      return function () {
+         switch (event.ctor)
+         {case "Spawn":
+            return _U.replace([["apples"
+                               ,{ctor: "::"
+                                ,_0: event._0
+                                ,_1: g.apples}]],
+              g);
+            case "Tick":
+            switch (event._0.ctor)
+              {case "_Tuple2":
+                 return function () {
+                      var out = function () {
+                         var $ = g.snake.head,
+                         x = $._0,
+                         y = $._1;
+                         return _U.cmp(Basics.abs(x),
+                         hWidth - size) > 0 || _U.cmp(Basics.abs(y),
+                         hHeight - size) > 0;
+                      }();
+                      var hit = function (apple) {
+                         return _U.cmp(vecLen(A2(vecSub,
+                         g.snake.head,
+                         apple.pos)),
+                         size + size) < 0;
+                      };
+                      var touched = A2(List.filter,
+                      hit,
+                      g.apples);
+                      var hitApple = Basics.not(List.isEmpty(touched));
+                      var untouched = A2(List.filter,
+                      function ($) {
+                         return Basics.not(hit($));
+                      },
+                      g.apples);
+                      var g$ = _U.replace([["snake"
+                                           ,A3(stepSnake,
+                                           event._0._1,
+                                           hitApple,
+                                           g.snake)]
+                                          ,["apples",untouched]
+                                          ,["score"
+                                           ,hitApple ? g.score + 1 : g.score]],
+                      g);
+                      return out ? defaultGame : g$;
+                   }();}
+              break;}
+         return g;
+      }();
+   });
+   var randX = rand(function (x) {
+      return width * x + (0 - hWidth);
+   });
+   var randY = rand(function (y) {
+      return height * y + (0 - hHeight);
+   });
+   var event = Signal.merges(_J.toList([A2(Signal.lift,
+                                       Tick,
+                                       input)
+                                       ,A2(Signal.lift,
+                                       function (pos) {
+                                          return Spawn(newApple(pos));
+                                       },
+                                       A3(Signal.lift2,
+                                       F2(function (v0,v1) {
+                                          return {ctor: "_Tuple2"
+                                                 ,_0: v0
+                                                 ,_1: v1};
+                                       }),
+                                       randX(interval),
+                                       randY(interval)))]));
+   var render = F2(function (_v29,
+   g) {
+      return function () {
+         switch (_v29.ctor)
+         {case "_Tuple2":
+            return function () {
+                 var txts = _J.toList([A3(formString,
+                 100,
+                 2,
+                 Prelude.show(g.score))]);
+                 var formSnake = function (head) {
+                    return Graphics.Collage.move(head)(Graphics.Collage.filled(Color.black)(Graphics.Collage.circle(size)));
+                 };
+                 var forms = _L.append(txts,
+                 _L.append(A2(List.map,
+                 formSnake,
+                 {ctor: "::"
+                 ,_0: g.snake.head
+                 ,_1: g.snake.body}),
+                 A2(List.map,
+                 function (a) {
+                    return formSnake(a.pos);
+                 },
+                 g.apples)));
+                 return Graphics.Element.color(Color.black)(A3(Graphics.Element.container,
+                 _v29._0,
+                 _v29._1,
+                 Graphics.Element.middle)(Graphics.Element.color(Color.white)(A3(Graphics.Collage.collage,
+                 width,
+                 height,
+                 forms))));
+              }();}
+         _E.Case($moduleName,
+         "between lines 150 and 153");
+      }();
+   });
+   var main = A2(Signal._op["~"],
+   A2(Signal._op["<~"],
+   render,
+   Window.dimensions),
+   A3(Signal.foldp,
+   stepGame,
+   defaultGame,
+   event));
+   _elm.Main.values = {_op: _op
+                      ,height: height
+                      ,width: width
+                      ,hHeight: hHeight
+                      ,hWidth: hWidth
+                      ,speed: speed
+                      ,spawnInterval: spawnInterval
+                      ,size: size
+                      ,vecLen: vecLen
+                      ,vecSub: vecSub
+                      ,formString: formString
+                      ,delta: delta
+                      ,input: input
+                      ,defaultApple: defaultApple
+                      ,defaultSnake: defaultSnake
+                      ,defaultGame: defaultGame
+                      ,newApple: newApple
+                      ,updatePos: updatePos
+                      ,init: init
+                      ,initHelper: initHelper
+                      ,updateBody: updateBody
+                      ,stepSnake: stepSnake
+                      ,stepGame: stepGame
+                      ,randFloat: randFloat
+                      ,rand: rand
+                      ,randX: randX
+                      ,randY: randY
+                      ,interval: interval
+                      ,event: event
+                      ,render: render
+                      ,main: main
+                      ,Tick: Tick
+                      ,Spawn: Spawn
+                      ,Up: Up
+                      ,Down: Down
+                      ,Left: Left
+                      ,Right: Right
+                      ,Apple: Apple
+                      ,Snake: Snake
+                      ,Game: Game};
+   return _elm.Main.values;
+};</script></head><body><script type="text/javascript">Elm.fullscreen(Elm.Main)</script><noscript></noscript></body></html>
