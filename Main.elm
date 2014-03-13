@@ -1,16 +1,18 @@
 import Window
 import Keyboard
+import Random
 
 (width, height) = (600, 400)
 (hWidth, hHeight) = (width/2, height/2)
 
 speed : Float
 speed = 5
+spawnInterval = 5
 
 size : Float
 size = 10
 
-data Event = Tick (Time, (Int, Int))
+data Event = Tick (Time, (Int, Int)) | Spawn Apple
 
 formString : Float -> Float -> String -> Form
 formString y scl str = toText str |> Text.color black
@@ -30,6 +32,12 @@ type Vec = (Float, Float)
 
 data Heading = Up | Down | Left | Right
 
+type Apple = { pos : Vec
+             , col : Color }
+
+defaultApple = { pos = (0,0) 
+               , col = lightGreen }
+
 type Snake = { head    : Vec
              , heading : Heading
              , body    : [Vec] }
@@ -43,12 +51,18 @@ defaultSnake = { head = (0, 0)
                           (0,0), 
                           (0,0) ] }
 
-type Game = { snake : Snake
-            , score : Int }
+type Game = { snake  : Snake
+            , score  : Int 
+            , apples : [Apple] }
 
 defaultGame : Game
 defaultGame = { snake = defaultSnake
-              , score = 0 }
+              , score = 0 
+              , apples = [] }
+
+newApple : Vec -> Apple
+newApple pos = { defaultApple | pos <- pos }
+
 
 updatePos : Heading -> Float ->  Vec -> Vec
 updatePos h sp (x,y) = if | h == Left  -> (x - sp, y)
@@ -94,20 +108,33 @@ stepGame event g =
     case event of
         Tick (t, dir) -> let  g' = { g | snake <- stepSnake dir g.snake
                                        , score <- g.score + 1 }
-                             out = let (x, y) = g.snake.head 
-                                   in abs x > hWidth - size || 
-                                        abs y > hHeight - size
+                              out = let (x, y) = g.snake.head 
+                                    in abs x > hWidth - size || 
+                                         abs y > hHeight - size
                          in if out then defaultGame else g'
+        Spawn a       -> { g | apples <- a :: g.apples }
         _             -> g
 
+randFloat sig = (lift (\x -> x / 100)
+                        (lift toFloat (Random.range 0 100 sig)))
+
+rand fn sig = lift fn (randFloat sig)
+
+randX = rand (\x -> (width * x) + -hWidth)
+
+randY = rand (\y -> (height * y) + -hHeight)
+
+interval = (every (second * spawnInterval))
+
 event : Signal Event
-event = merges [ lift Tick input ]
+event = merges [ lift Tick input 
+               , lift (\x -> Spawn (newApple (x,0))) (randX interval) ]
 
 render : (Int, Int) -> Game -> Element
 render (w, h) g = 
     let formSnake head = circle size |> filled black |> move head
         txts  = [ {-(formString 100 2 (show g.snake.body))-} ]
-        forms = txts ++ map formSnake (g.snake.head :: g.snake.body)
+        forms = txts ++ map formSnake (g.snake.head :: g.snake.body) ++ map (\a -> formSnake a.pos) g.apples 
     in color black <| container w h middle <| color white <| collage width height forms
 
 main : Signal Element
