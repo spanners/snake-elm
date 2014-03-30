@@ -22,7 +22,7 @@ data Event = Tick (Time, (Int, Int)) | Spawn Apple
 
 formString : Float -> Float -> String -> Form
 formString y scl str = toText str |> Text.color black
-                          |> text 
+                          |> centered
                           |> toForm
                           |> scale scl 
                           |> move (0, y)
